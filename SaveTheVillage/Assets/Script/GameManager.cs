@@ -11,11 +11,13 @@ public class GameManager : MonoBehaviour
 
     public Image peasantTimerImg;
     public Image warriorTimerImg;
+    public GameObject gameOver;
 
     public Button peasantButton;
     public Button warriorButton;
 
     public Text resourcesText;
+    public Text waveOfEnemies;
 
     public int peasantCount;
     public int warriorCount;
@@ -33,41 +35,71 @@ public class GameManager : MonoBehaviour
     public float warriorCreateTime;
     public float raidMaxTime;
 
-    private float peasantTimer = - 2;
-    private float warriorTimer = - 2;
+    private float peasantTimer = -2;
+    private float warriorTimer = -2;
     private float raidTimer;
+    private int wave = 1;
 
 
 
     private void Start()
     {
-        UpdateText();
         raidTimer = raidMaxTime;
     }
 
     private void Update()
     {
-        raidTimer -= Time.deltaTime;
-        raidTimerImg.fillAmount = raidTimer / raidMaxTime;
+        RaidTimer();
 
-        if(raidTimer <= 0)
+        HarvestAndEatingTimer();
+
+        PeasantTimer();
+
+        WarriorTimer();
+
+        UpdateText();
+
+        GameOver();
+
+
+    }
+
+    public void CreatePeasant()
+    {
+        if(wheatCount >= wheatPerPeasant) 
         {
-            raidTimer = raidMaxTime;
-            warriorCount -= raidNext;
-            raidNext += raidIncrease;
+            wheatCount -= peasantCost;
+            peasantTimer = peasantCreateTime;
+            peasantButton.interactable = false;
         }
+    }
 
-        if (harvestTimer.tick)
+    public void CreateWarrior()
+    {
+        if(wheatCount >= wheatToWarriors)
         {
-            wheatCount += peasantCount * wheatPerPeasant;
+            wheatCount -= warriorCost;
+            warriorTimer = warriorCreateTime;
+            warriorButton.interactable = false;
         }
-
-        if (eatingTimer.tick)
+    }
+    public void GameOver()
+    {
+        if (warriorCount < 0)
         {
-            wheatCount -= warriorCount * wheatToWarriors;
+            gameOver.SetActive(true);
         }
+    }
 
-        if(peasantTimer > 0)
+    private void UpdateText()
+    {
+        resourcesText.text = peasantCount + "\n\n" + warriorCount + "\n\n" + wheatCount + "\n\n" + raidNext;
+        waveOfEnemies.text = $"Набег врагов:\n {wave} волна";
+    }
+
+    private void PeasantTimer()
+    {
+        if (peasantTimer > 0)
         {
             peasantTimer -= Time.deltaTime;
             peasantTimerImg.fillAmount = peasantTimer / peasantCreateTime;
@@ -77,11 +109,13 @@ public class GameManager : MonoBehaviour
             peasantTimerImg.fillAmount = 1;
             peasantTimer = -2;
             peasantButton.interactable = true;
-            peasantCount += 1; 
+            peasantCount += 1;
         }
+    }
 
-
-        if(warriorTimer > 0)
+    private void WarriorTimer()
+    {
+        if (warriorTimer > 0)
         {
             warriorTimer -= Time.deltaTime;
             warriorTimerImg.fillAmount = warriorTimer / warriorCreateTime;
@@ -93,26 +127,32 @@ public class GameManager : MonoBehaviour
             warriorButton.interactable = true;
             warriorCount += 1;
         }
-
-        UpdateText();
-
     }
-    public void CreatePeasant()
-    {
-        wheatCount -= peasantCost;
-        peasantTimer = peasantCreateTime;
-        peasantButton.interactable = false;
 
-    }
-    public void CreateWarrior()
+    private void RaidTimer()
     {
-        wheatCount -= warriorCost;
-        warriorTimer = warriorCreateTime;
-        warriorButton.interactable = false;
+        raidTimer -= Time.deltaTime;
+        raidTimerImg.fillAmount = raidTimer / raidMaxTime;
 
+        if (raidTimer <= 0)
+        {
+            wave += 1;
+            raidTimer = raidMaxTime;
+            warriorCount -= raidNext;
+            raidNext += raidIncrease;
+        }
     }
-    private void UpdateText()
+
+    private void HarvestAndEatingTimer()
     {
-        resourcesText.text = peasantCount + "\n\n" + warriorCount + "\n\n" + wheatCount;
+        if (harvestTimer.tick)
+        {
+            wheatCount += peasantCount * wheatPerPeasant;
+        }
+
+        if (eatingTimer.tick)
+        {
+            wheatCount -= warriorCount * wheatToWarriors;
+        }
     }
 }
