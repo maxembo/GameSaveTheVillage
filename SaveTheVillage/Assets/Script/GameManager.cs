@@ -20,7 +20,6 @@ public class GameManager : MonoBehaviour
     [SerializeField] private GameObject gameOver;
     [SerializeField] private GameObject winGame;
     [SerializeField] private GameObject menuPause;
-    [SerializeField] private GameObject informMenu;
     
 
     [SerializeField] private Button peasantButton;
@@ -160,7 +159,7 @@ public class GameManager : MonoBehaviour
             upgradeWarrior.SetActive(false);
         }
     }
-
+   
     private void ContinueGame()
     {
         if (!paused)
@@ -262,5 +261,5 @@ public class GameManager : MonoBehaviour
             upgradePeasant.SetActive(true);
         }
     }
-   
+
 }
